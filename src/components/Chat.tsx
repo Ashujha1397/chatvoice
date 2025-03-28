@@ -40,9 +40,9 @@ const Chat: React.FC = () => {
   const isInputDisabled = state.status === "processing" || state.status === "speaking";
 
   return (
-    <Card className="flex flex-col h-full rounded-xl shadow-lg border overflow-hidden">
-      <div className="bg-agent-gradient p-3 flex justify-between items-center">
-        <h1 className="text-lg font-bold text-primary-foreground">Interview Assistant</h1>
+    <Card className="flex flex-col h-full rounded-xl shadow-lg border overflow-hidden bg-white/5 backdrop-blur-sm">
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 flex justify-between items-center">
+        <h1 className="text-xl font-bold text-white">Interview Assistant</h1>
         <div className="flex items-center space-x-2">
           <TooltipProvider>
             <Tooltip>
@@ -50,7 +50,7 @@ const Chat: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-primary-foreground"
+                  className="h-8 w-8 text-white hover:bg-white/20"
                   onClick={cancelSpeech}
                 >
                   <VolumeX className="h-4 w-4" />
@@ -68,13 +68,13 @@ const Chat: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-primary-foreground"
+                  className="h-8 w-8 text-white hover:bg-white/20"
                 >
                   <Info className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
-                <p>Ask me interview questions and I'll respond as you would!</p>
+              <TooltipContent className="max-w-xs">
+                <p>Ask interview questions like: What's your life story? What's your #1 superpower? What are your growth areas? What misconceptions do your coworkers have?</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -84,7 +84,7 @@ const Chat: React.FC = () => {
       <CardContent className="flex-1 flex flex-col p-0 h-[calc(100%-64px)]">
         <ChatContainer messages={state.messages} />
         
-        <div className="p-4 border-t bg-background">
+        <div className="p-4 border-t bg-background/50 backdrop-blur-sm">
           <div className="space-y-4">
             <TextInput 
               onSendMessage={sendTextMessage} 
