@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,11 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				bot: {
+					light: '#E5DEFF',
+					DEFAULT: '#8B5CF6',
+					dark: '#6E59A5'
 				}
 			},
 			borderRadius: {
@@ -84,11 +90,30 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-slow': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.5' }
+				},
+				'wave': {
+					'0%': { transform: 'scaleY(0.2)' },
+					'50%': { transform: 'scaleY(1)' },
+					'100%': { transform: 'scaleY(0.2)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-slow': 'pulse-slow 1.5s ease-in-out infinite',
+				'wave1': 'wave 1.2s ease-in-out infinite',
+				'wave2': 'wave 1.3s ease-in-out infinite 0.1s',
+				'wave3': 'wave 1.4s ease-in-out infinite 0.2s',
+				'wave4': 'wave 1.5s ease-in-out infinite 0.3s',
+				'wave5': 'wave 1.2s ease-in-out infinite 0.4s',
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+				'agent-gradient': 'linear-gradient(135deg, #E5DEFF 0%, #D6BCFA 100%)',
 			}
 		}
 	},
