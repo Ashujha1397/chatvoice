@@ -6,7 +6,7 @@ import TextInput from "./TextInput";
 import { useChat } from "@/contexts/ChatContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Info, VolumeX } from "lucide-react";
+import { Info, VolumeX, Sparkles } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -40,9 +40,12 @@ const Chat: React.FC = () => {
   const isInputDisabled = state.status === "processing" || state.status === "speaking";
 
   return (
-    <Card className="flex flex-col h-full rounded-xl shadow-lg border overflow-hidden bg-white/10 backdrop-blur-sm">
-      <div className="bg-gradient-to-r from-purple-700 to-indigo-800 p-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-white">AI Interview Assistant</h1>
+    <Card className="flex flex-col h-full rounded-xl shadow-xl border overflow-hidden bg-black/30 backdrop-blur-sm border-indigo-900/50">
+      <div className="bg-gradient-to-r from-indigo-900 to-purple-900 p-4 flex justify-between items-center border-b border-indigo-800">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-indigo-300" />
+          <h1 className="text-xl font-bold text-white">AI Interview Assistant</h1>
+        </div>
         <div className="flex items-center space-x-2">
           <TooltipProvider>
             <Tooltip>
@@ -50,7 +53,7 @@ const Chat: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-white hover:bg-white/20"
+                  className="h-8 w-8 text-white hover:bg-white/10"
                   onClick={cancelSpeech}
                 >
                   <VolumeX className="h-4 w-4" />
@@ -68,13 +71,13 @@ const Chat: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-white hover:bg-white/20"
+                  className="h-8 w-8 text-white hover:bg-white/10"
                 >
                   <Info className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p>Ask interview questions like: "Tell me about your background," "What's your greatest strength?", "How do you handle challenges?", or "What unique perspectives do you bring to a team?"</p>
+                <p>Ask interview questions like: "Tell me about your background," "What's your greatest strength?", "How do you handle challenges?", or "What's your #1 superpower?"</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -84,7 +87,7 @@ const Chat: React.FC = () => {
       <CardContent className="flex-1 flex flex-col p-0 h-[calc(100%-64px)]">
         <ChatContainer messages={state.messages} />
         
-        <div className="p-4 border-t border-indigo-100 dark:border-indigo-900 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
+        <div className="p-4 border-t border-indigo-900/50 bg-gray-900/50 backdrop-blur-sm">
           <div className="space-y-4">
             <TextInput 
               onSendMessage={sendTextMessage} 

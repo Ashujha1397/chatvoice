@@ -158,6 +158,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
       
       const OPENAI_API_KEY = "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";
 
+      // Enhance system prompt to provide more varied responses for superpowers
+      const superpowerPrompts = [
+        "For questions about your 'superpower', vary your answers among these options with natural phrasing:\n" +
+        "1. Adaptive problem-solving: describe how you quickly analyze situations and find creative solutions\n" +
+        "2. Emotional intelligence: explain how you read people and situations accurately\n" +
+        "3. Resilience under pressure: mention staying calm and focused when deadlines or challenges arise\n" +
+        "4. Strategic thinking: talk about seeing the big picture while managing details\n" +
+        "5. Communication bridging: discuss translating complex ideas into clear language for different audiences\n" +
+        "Add specific personal examples and conversational language to make it sound natural."
+      ];
+
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -182,6 +193,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
                         - Strike a balance between confidence and humility
                         - Avoid corporate jargon and sound like a real person
                         
+                        ${superpowerPrompts}
+                        
                         For questions about weaknesses or growth areas, be honest but frame them constructively.
                         For questions about strengths or accomplishments, be confident but not arrogant.
                         For personal questions, create believable life experiences that sound authentic.`,
@@ -192,7 +205,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
             })),
             { role: "user", content: userMessage },
           ],
-          temperature: 0.8,
+          temperature: 0.9,
           max_tokens: 500,
         }),
       });

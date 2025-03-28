@@ -16,10 +16,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       isUser ? "justify-end" : "justify-start"
     )}>
       <div className={cn(
-        "max-w-[85%] px-4 py-3 rounded-2xl shadow-md",
+        "max-w-[85%] px-4 py-3 rounded-2xl shadow-lg",
         isUser 
-          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white" 
-          : "bg-gradient-to-br from-white to-indigo-50 dark:from-gray-800 dark:to-indigo-950 text-gray-800 dark:text-gray-100 border border-indigo-100 dark:border-indigo-900"
+          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border border-indigo-500" 
+          : "bg-gradient-to-br from-gray-800 to-indigo-950 text-gray-100 border border-indigo-900/50"
       )}>
         <p className="text-md leading-relaxed">{message.content}</p>
       </div>
