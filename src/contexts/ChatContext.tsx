@@ -23,6 +23,7 @@ const ChatContext = createContext<{
   stopRecording: () => void;
   addMessage: (role: "user" | "assistant", content: string) => void;
   setStatus: (status: VoiceStatus) => void;
+  sendTextMessage: (message: string) => void;
 } | null>(null);
 
 const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
@@ -155,11 +156,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setStatus("processing");
       
+      const OPENAI_API_KEY = "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";
+
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
@@ -277,6 +280,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const sendTextMessage = (message: string) => {
+    if (message.trim()) {
+      addMessage("user", message.trim());
+      sendMessageToOpenAI(message.trim());
+    }
+  };
+
   return (
     <ChatContext.Provider
       value={{
@@ -285,6 +295,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
         stopRecording,
         addMessage,
         setStatus,
+        sendTextMessage,
       }}
     >
       {children}

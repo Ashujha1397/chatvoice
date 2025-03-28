@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import ChatContainer from "./ChatContainer";
 import VoiceButton from "./VoiceButton";
+import TextInput from "./TextInput";
 import { useChat } from "@/contexts/ChatContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import {
 } from "@/components/ui/tooltip";
 
 const Chat: React.FC = () => {
-  const { state, startRecording, stopRecording } = useChat();
+  const { state, startRecording, stopRecording, sendTextMessage } = useChat();
 
   useEffect(() => {
     // Request microphone permission on component mount
@@ -35,6 +36,8 @@ const Chat: React.FC = () => {
       window.speechSynthesis.cancel();
     }
   };
+
+  const isInputDisabled = state.status === "processing" || state.status === "speaking";
 
   return (
     <Card className="flex flex-col h-full rounded-xl shadow-lg border overflow-hidden">
@@ -82,13 +85,20 @@ const Chat: React.FC = () => {
         <ChatContainer messages={state.messages} />
         
         <div className="p-4 border-t bg-background">
-          <div className="flex justify-center items-center py-2">
-            <VoiceButton
-              status={state.status}
-              isRecording={state.isRecording}
-              startRecording={startRecording}
-              stopRecording={stopRecording}
+          <div className="space-y-4">
+            <TextInput 
+              onSendMessage={sendTextMessage} 
+              isDisabled={isInputDisabled}
             />
+            
+            <div className="flex justify-center items-center">
+              <VoiceButton
+                status={state.status}
+                isRecording={state.isRecording}
+                startRecording={startRecording}
+                stopRecording={stopRecording}
+              />
+            </div>
           </div>
         </div>
       </CardContent>
