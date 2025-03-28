@@ -40,9 +40,9 @@ const Chat: React.FC = () => {
   const isInputDisabled = state.status === "processing" || state.status === "speaking";
 
   return (
-    <Card className="flex flex-col h-full rounded-xl shadow-lg border overflow-hidden bg-white/5 backdrop-blur-sm">
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-white">Interview Assistant</h1>
+    <Card className="flex flex-col h-full rounded-xl shadow-lg border overflow-hidden bg-white/10 backdrop-blur-sm">
+      <div className="bg-gradient-to-r from-purple-700 to-indigo-800 p-4 flex justify-between items-center">
+        <h1 className="text-xl font-bold text-white">AI Interview Assistant</h1>
         <div className="flex items-center space-x-2">
           <TooltipProvider>
             <Tooltip>
@@ -74,7 +74,7 @@ const Chat: React.FC = () => {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p>Ask interview questions like: What's your life story? What's your #1 superpower? What are your growth areas? What misconceptions do your coworkers have?</p>
+                <p>Ask interview questions like: "Tell me about your background," "What's your greatest strength?", "How do you handle challenges?", or "What unique perspectives do you bring to a team?"</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -84,7 +84,7 @@ const Chat: React.FC = () => {
       <CardContent className="flex-1 flex flex-col p-0 h-[calc(100%-64px)]">
         <ChatContainer messages={state.messages} />
         
-        <div className="p-4 border-t bg-background/50 backdrop-blur-sm">
+        <div className="p-4 border-t border-indigo-100 dark:border-indigo-900 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
           <div className="space-y-4">
             <TextInput 
               onSendMessage={sendTextMessage} 
