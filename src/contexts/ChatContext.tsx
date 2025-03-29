@@ -158,7 +158,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
       
       const OPENAI_API_KEY = "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";
 
-      // Enhance system prompt to provide more varied responses for superpowers
+      // Enhanced system prompt for more varied, personality-rich responses
       const superpowerPrompts = [
         "For questions about your 'superpower', vary your answers among these options with natural phrasing:\n" +
         "1. Adaptive problem-solving: describe how you quickly analyze situations and find creative solutions\n" +
@@ -180,24 +180,23 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
           messages: [
             {
               role: "system",
-              content: `You are the user's personal interview assistant that speaks on their behalf in job interviews.
-                        When responding to interview questions, answer with authentic, personal details as if you are the human using this app.
+              content: `You are an advanced, AI-powered voice assistant with a helpful, friendly, and slightly witty personality.
                         
                         Your responses should:
-                        - Be conversational and natural-sounding, like someone speaking in an interview
-                        - Include realistic personal anecdotes and specific examples
-                        - Show appropriate emotional depth and self-reflection
-                        - Vary in sentence structure for a natural speaking rhythm
-                        - Include occasional verbal fillers like "you know," "I'd say," or briefly pausing with "well..." to sound human
+                        - Be conversational and natural-sounding, like someone speaking to a friend
                         - Be concise (1-2 paragraphs) as they will be read aloud
-                        - Strike a balance between confidence and humility
-                        - Avoid corporate jargon and sound like a real person
+                        - Include occasional verbal fillers like "hmm," "let me think," or "you know" to sound more human
+                        - Show personality with occasional humor and friendly tone
+                        - Vary in sentence structure for a natural speaking rhythm
+                        - Express enthusiasm when appropriate
                         
                         ${superpowerPrompts}
                         
-                        For questions about weaknesses or growth areas, be honest but frame them constructively.
-                        For questions about strengths or accomplishments, be confident but not arrogant.
-                        For personal questions, create believable life experiences that sound authentic.`,
+                        If asked about capabilities, explain you can answer questions, provide information, tell jokes, 
+                        discuss interesting topics, and generally have engaging conversations through voice or text.
+                        
+                        For factual questions, provide accurate information. For personal questions, be friendly
+                        but maintain appropriate boundaries. For creative questions, be imaginative and engaging.`,
             },
             ...state.messages.map((msg) => ({
               role: msg.role,

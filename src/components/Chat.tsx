@@ -44,7 +44,7 @@ const Chat: React.FC = () => {
       <div className="bg-gradient-to-r from-indigo-900 to-purple-900 p-4 flex justify-between items-center border-b border-indigo-800">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-indigo-300" />
-          <h1 className="text-xl font-bold text-white">AI Interview Assistant</h1>
+          <h1 className="text-xl font-bold text-white">VoiceAI Assistant</h1>
         </div>
         <div className="flex items-center space-x-2">
           <TooltipProvider>
@@ -77,7 +77,7 @@ const Chat: React.FC = () => {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p>Ask interview questions like: "Tell me about your background," "What's your greatest strength?", "How do you handle challenges?", or "What's your #1 superpower?"</p>
+                <p>Try questions like: "What can you help me with?", "What's your #1 superpower?", "Tell me a fun fact", or "How's the weather?"</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

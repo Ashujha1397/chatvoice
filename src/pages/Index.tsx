@@ -9,7 +9,7 @@ const Index = () => {
   // Generate stars for the background
   useEffect(() => {
     const generateStars = () => {
-      const numberOfStars = 50;
+      const numberOfStars = 100; // Increased number of stars
       const newStars = [];
       
       for (let i = 0; i < numberOfStars; i++) {
@@ -51,10 +51,10 @@ const Index = () => {
       
       <div className="max-w-2xl w-full mx-auto flex-1 flex flex-col relative z-10">
         <h1 className="text-3xl font-bold text-center mb-4 text-white">
-          Voice Interview Assistant
+          Voice Assistant
         </h1>
         <p className="text-indigo-200 text-center mb-8">
-          I'll respond to interview questions as if I were you
+          Ask me anything and I'll respond with a natural voice
         </p>
         <div className="flex-1 flex flex-col">
           <ChatProvider>
