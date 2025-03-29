@@ -8,7 +8,8 @@ type ChatAction =
   | { type: "SET_STATUS"; payload: VoiceStatus }
   | { type: "SET_RECORDING"; payload: boolean }
   | { type: "SET_TRANSCRIPT"; payload: string }
-  | { type: "CLEAR_TRANSCRIPT" };
+  | { type: "CLEAR_TRANSCRIPT" }
+  | { type: "CLEAR_MESSAGES" };
 
 const initialState: ChatState = {
   messages: [],
@@ -24,6 +25,7 @@ const ChatContext = createContext<{
   addMessage: (role: "user" | "assistant", content: string) => void;
   setStatus: (status: VoiceStatus) => void;
   sendTextMessage: (message: string) => void;
+  terminateConversation: () => void;
 } | null>(null);
 
 const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
@@ -53,6 +55,11 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
         ...state,
         transcript: "",
       };
+    case "CLEAR_MESSAGES":
+      return {
+        ...state,
+        messages: [],
+      };
     default:
       return state;
   }
@@ -81,6 +88,32 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const setStatus = (status: VoiceStatus) => {
     dispatch({ type: "SET_STATUS", payload: status });
+  };
+
+  // Terminate conversation function
+  const terminateConversation = () => {
+    // Stop any ongoing speech
+    if (synth.speaking) {
+      synth.cancel();
+    }
+    
+    // Stop any ongoing recording
+    if (state.isRecording && recognitionRef.current) {
+      recognitionRef.current.stop();
+      dispatch({ type: "SET_RECORDING", payload: false });
+    }
+    
+    // Reset status to idle
+    setStatus("idle");
+    
+    // Clear all messages
+    dispatch({ type: "CLEAR_MESSAGES" });
+    
+    // Show toast notification
+    toast({
+      title: "Conversation terminated",
+      description: "Starting a new conversation.",
+    });
   };
 
   // Speech synthesis setup
@@ -319,6 +352,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
         addMessage,
         setStatus,
         sendTextMessage,
+        terminateConversation,
       }}
     >
       {children}

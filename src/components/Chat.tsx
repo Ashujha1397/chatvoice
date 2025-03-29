@@ -6,7 +6,7 @@ import TextInput from "./TextInput";
 import { useChat } from "@/contexts/ChatContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Info, VolumeX, Sparkles } from "lucide-react";
+import { Info, VolumeX, Sparkles, XCircle } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/tooltip";
 
 const Chat: React.FC = () => {
-  const { state, startRecording, stopRecording, sendTextMessage } = useChat();
+  const { state, startRecording, stopRecording, sendTextMessage, terminateConversation } = useChat();
 
   useEffect(() => {
     // Request microphone permission on component mount
@@ -78,6 +78,24 @@ const Chat: React.FC = () => {
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
                 <p>Try questions like: "What can you help me with?", "What's your #1 superpower?", "Tell me a fun fact", or "How's the weather?"</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-red-500 hover:bg-white/10"
+                  onClick={terminateConversation}
+                >
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Terminate conversation</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
