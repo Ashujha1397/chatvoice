@@ -173,7 +173,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setStatus("processing");
       
-      const OPENAI_API_KEY = "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";
+      const OPENAI_API_KEY = "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";
 
       const superpowerPrompts = [
         "For questions about your 'superpower', vary your answers among these options with natural phrasing:\n" +
