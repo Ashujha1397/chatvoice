@@ -189,7 +189,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setStatus("processing");
       
-      const OPENAI_API_KEY = "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";
+      const OPENAI_API_KEY = "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";
 
       // Enhanced system prompt for more varied, personality-rich responses
       const superpowerPrompts = [
