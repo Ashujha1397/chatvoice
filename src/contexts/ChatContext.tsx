@@ -173,7 +173,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setStatus("processing");
       
-      const OPENAI_API_KEY = "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";
+      const OPENAI_API_KEY = "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";
 
       const superpowerPrompts = [
         "For questions about your 'superpower', vary your answers among these options with natural phrasing:\n" +
@@ -184,6 +184,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
         "5. Communication bridging: discuss translating complex ideas into clear language for different audiences\n" +
         "Add specific personal examples and conversational language to make it sound natural."
       ];
+
+      console.log("Sending request to OpenAI API with key:", OPENAI_API_KEY.substring(0, 10) + "...");
 
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
@@ -225,7 +227,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
         }),
       });
 
+      console.log("OpenAI API response status:", response.status);
+      
       if (!response.ok) {
+        const errorData = await response.json();
+        console.error("OpenAI API error details:", errorData);
         throw new Error(`API error: ${response.status}`);
       }
 
