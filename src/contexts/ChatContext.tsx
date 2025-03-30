@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, useRef, useState, useEffect } from "react";
 import { Message, VoiceStatus, ChatState } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
@@ -75,7 +74,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
   const synth = window.speechSynthesis;
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  // Chat function
   const addMessage = (role: "user" | "assistant", content: string) => {
     const message: Message = {
       id: Date.now().toString(),
@@ -90,43 +88,33 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     dispatch({ type: "SET_STATUS", payload: status });
   };
 
-  // Terminate conversation function
   const terminateConversation = () => {
-    // Stop any ongoing speech
     if (synth.speaking) {
       synth.cancel();
     }
     
-    // Stop any ongoing recording
     if (state.isRecording && recognitionRef.current) {
       recognitionRef.current.stop();
       dispatch({ type: "SET_RECORDING", payload: false });
     }
     
-    // Reset status to idle
     setStatus("idle");
-    
-    // Clear all messages
     dispatch({ type: "CLEAR_MESSAGES" });
     
-    // Show toast notification
     toast({
       title: "Conversation terminated",
       description: "Starting a new conversation.",
     });
   };
 
-  // Speech synthesis setup
   useEffect(() => {
     utteranceRef.current = new SpeechSynthesisUtterance();
     utteranceRef.current.rate = 1.0;
     utteranceRef.current.pitch = 1.0;
     utteranceRef.current.volume = 1.0;
     
-    // Get the voices
     const populateVoices = () => {
       const voices = synth.getVoices();
-      // Look for a good English voice
       const preferredVoice = voices.find(
         (voice) => 
           voice.name.includes("Google") && 
@@ -147,7 +135,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
       synth.onvoiceschanged = populateVoices;
     }
 
-    // Clean up
     return () => {
       if (synth.speaking) {
         synth.cancel();
@@ -155,11 +142,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, []);
 
-  // Handle speaking the assistant's messages
   const speakMessage = (text: string) => {
     if (!utteranceRef.current) return;
 
-    // Cancel any ongoing speech
     if (synth.speaking) {
       synth.cancel();
     }
@@ -184,14 +169,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     synth.speak(utteranceRef.current);
   };
 
-  // Send message to OpenAI API
   const sendMessageToOpenAI = async (userMessage: string) => {
     try {
       setStatus("processing");
       
-      const OPENAI_API_KEY = "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";
+      const OPENAI_API_KEY = "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";
 
-      // Enhanced system prompt for more varied, personality-rich responses
       const superpowerPrompts = [
         "For questions about your 'superpower', vary your answers among these options with natural phrasing:\n" +
         "1. Adaptive problem-solving: describe how you quickly analyze situations and find creative solutions\n" +
@@ -264,7 +247,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // Speech recognition setup
   const startRecording = () => {
     if (state.isRecording) return;
     
