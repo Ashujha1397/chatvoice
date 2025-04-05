@@ -21,18 +21,34 @@ const Chat: React.FC = () => {
     // Request microphone permission on component mount
     const requestMicrophonePermission = async () => {
       try {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        // Permission granted, we don't need to do anything with the stream
+        console.log("Requesting microphone permission");
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        console.log("Microphone permission granted");
+        // Clean up the stream
+        stream.getTracks().forEach(track => track.stop());
       } catch (error) {
         console.error("Microphone permission denied:", error);
       }
     };
 
+    // Initialize speech synthesis
+    const initSpeechSynthesis = () => {
+      if ('speechSynthesis' in window) {
+        console.log("Speech synthesis available in browser");
+        // Trigger voices loading
+        window.speechSynthesis.getVoices();
+      } else {
+        console.error("Speech synthesis not available in this browser");
+      }
+    };
+
     requestMicrophonePermission();
+    initSpeechSynthesis();
   }, []);
 
   const cancelSpeech = () => {
     if (window.speechSynthesis.speaking) {
+      console.log("Cancelling speech");
       window.speechSynthesis.cancel();
     }
   };

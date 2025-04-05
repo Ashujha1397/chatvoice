@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useReducer, useRef, useState, useEffect } from "react";
 import { Message, VoiceStatus, ChatState } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
@@ -108,6 +109,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
+    // Initialize speech synthesis
     utteranceRef.current = new SpeechSynthesisUtterance();
     utteranceRef.current.rate = 1.0;
     utteranceRef.current.pitch = 1.0;
@@ -115,6 +117,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     
     const populateVoices = () => {
       const voices = synth.getVoices();
+      console.log("Available voices:", voices.map(v => `${v.name} (${v.lang})`));
+      
+      // Try to find a good English voice
       const preferredVoice = voices.find(
         (voice) => 
           voice.name.includes("Google") && 
@@ -125,12 +130,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
       ) || voices[0];
       
       if (utteranceRef.current && preferredVoice) {
+        console.log("Selected voice:", preferredVoice.name);
         utteranceRef.current.voice = preferredVoice;
       }
     };
     
+    // Try to populate voices immediately
     populateVoices();
     
+    // Also set up event listener for when voices are loaded asynchronously
     if (synth.onvoiceschanged !== undefined) {
       synth.onvoiceschanged = populateVoices;
     }
@@ -143,37 +151,57 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const speakMessage = (text: string) => {
-    if (!utteranceRef.current) return;
-
-    if (synth.speaking) {
-      synth.cancel();
+    if (!utteranceRef.current) {
+      console.error("Speech synthesis utterance not initialized");
+      return;
     }
 
-    setStatus("speaking");
-    utteranceRef.current.text = text;
-    
-    utteranceRef.current.onend = () => {
+    try {
+      if (synth.speaking) {
+        console.log("Cancelling current speech before speaking new text");
+        synth.cancel();
+      }
+
+      // Make sure we have the latest voices
+      if (synth.getVoices().length > 0 && !utteranceRef.current.voice) {
+        const voices = synth.getVoices();
+        const defaultVoice = voices.find(v => v.lang === 'en-US') || voices[0];
+        utteranceRef.current.voice = defaultVoice;
+        console.log("Set voice to:", defaultVoice?.name);
+      }
+
+      setStatus("speaking");
+      console.log("Speaking text:", text.substring(0, 50) + "...");
+      utteranceRef.current.text = text;
+      
+      utteranceRef.current.onend = () => {
+        console.log("Speech completed");
+        setStatus("idle");
+      };
+      
+      utteranceRef.current.onerror = (e) => {
+        console.error("Speech synthesis error:", e);
+        setStatus("idle");
+        toast({
+          title: "Voice error",
+          description: "Unable to speak the response.",
+          variant: "destructive",
+        });
+      };
+      
+      synth.speak(utteranceRef.current);
+    } catch (error) {
+      console.error("Error in speech synthesis:", error);
       setStatus("idle");
-    };
-    
-    utteranceRef.current.onerror = (e) => {
-      console.error("Speech synthesis error:", e);
-      setStatus("idle");
-      toast({
-        title: "Voice error",
-        description: "Unable to speak the response.",
-        variant: "destructive",
-      });
-    };
-    
-    synth.speak(utteranceRef.current);
+    }
   };
 
   const sendMessageToOpenAI = async (userMessage: string) => {
     try {
       setStatus("processing");
+      console.log("Processing message:", userMessage);
       
-      const OPENAI_API_KEY = "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";
+      const OPENAI_API_KEY = "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";
 
       const superpowerPrompts = [
         "For questions about your 'superpower', vary your answers among these options with natural phrasing:\n" +
@@ -185,7 +213,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
         "Add specific personal examples and conversational language to make it sound natural."
       ];
 
-      console.log("Sending request to OpenAI API with key:", OPENAI_API_KEY.substring(0, 10) + "...");
+      console.log("Sending request to OpenAI API");
 
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
@@ -236,9 +264,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const data = await response.json();
+      console.log("OpenAI API response received");
       const assistantMessage = data.choices[0]?.message?.content.trim();
       
       if (assistantMessage) {
+        console.log("Assistant message:", assistantMessage.substring(0, 50) + "...");
         addMessage("assistant", assistantMessage);
         speakMessage(assistantMessage);
       }
@@ -262,6 +292,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      console.log("Initializing SpeechRecognition");
       recognitionRef.current = new SpeechRecognition();
       
       recognitionRef.current.continuous = true;
@@ -269,6 +300,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
       recognitionRef.current.lang = "en-US";
       
       recognitionRef.current.onstart = () => {
+        console.log("Speech recognition started");
         dispatch({ type: "SET_RECORDING", payload: true });
         setStatus("listening");
         dispatch({ type: "CLEAR_TRANSCRIPT" });
@@ -280,6 +312,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
           .map(result => result.transcript)
           .join("");
           
+        console.log("Transcript updated:", transcript);
         dispatch({ type: "SET_TRANSCRIPT", payload: transcript });
       };
       
@@ -294,11 +327,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
       };
       
       recognitionRef.current.onend = () => {
+        console.log("Speech recognition ended");
         if (state.isRecording) {
           stopRecording();
         }
       };
       
+      console.log("Starting speech recognition");
       recognitionRef.current.start();
     } catch (error) {
       console.error("Failed to start recording:", error);
@@ -312,13 +347,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const stopRecording = () => {
     if (recognitionRef.current) {
+      console.log("Stopping speech recognition");
       recognitionRef.current.stop();
       dispatch({ type: "SET_RECORDING", payload: false });
       
       if (state.transcript.trim()) {
+        console.log("Sending transcript to OpenAI:", state.transcript.trim());
         addMessage("user", state.transcript.trim());
         sendMessageToOpenAI(state.transcript.trim());
       } else {
+        console.log("No transcript to send");
         setStatus("idle");
       }
     }
@@ -326,6 +364,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const sendTextMessage = (message: string) => {
     if (message.trim()) {
+      console.log("Sending text message:", message.trim());
       addMessage("user", message.trim());
       sendMessageToOpenAI(message.trim());
     }
