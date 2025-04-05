@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, useRef, useState, useEffect } from "react";
 import { Message, VoiceStatus, ChatState } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
@@ -109,12 +108,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
-    // Initialize speech synthesis
+    // Create a new utterance instance
     utteranceRef.current = new SpeechSynthesisUtterance();
-    utteranceRef.current.rate = 1.0;
-    utteranceRef.current.pitch = 1.0;
-    utteranceRef.current.volume = 1.0;
     
+    // Set default properties
+    if (utteranceRef.current) {
+      utteranceRef.current.rate = 1.0;
+      utteranceRef.current.pitch = 1.0;
+      utteranceRef.current.volume = 1.0;
+      console.log("Speech synthesis utterance initialized");
+    }
+    
+    // Function to set voice
     const populateVoices = () => {
       const voices = synth.getVoices();
       console.log("Available voices:", voices.map(v => `${v.name} (${v.lang})`));
@@ -122,9 +127,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
       // Try to find a good English voice
       const preferredVoice = voices.find(
         (voice) => 
-          voice.name.includes("Google") && 
+          (voice.name.includes("Google") && 
           voice.name.includes("US") && 
-          voice.name.includes("Female")
+          voice.lang === 'en-US')
       ) || voices.find(
         (voice) => voice.lang === 'en-US'
       ) || voices[0];
@@ -135,14 +140,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     };
     
-    // Try to populate voices immediately
-    populateVoices();
-    
-    // Also set up event listener for when voices are loaded asynchronously
-    if (synth.onvoiceschanged !== undefined) {
-      synth.onvoiceschanged = populateVoices;
+    // Initial attempt to populate voices
+    if (synth.getVoices().length > 0) {
+      populateVoices();
     }
+    
+    // Set up event listener for when voices are loaded asynchronously
+    synth.onvoiceschanged = populateVoices;
 
+    // Cleanup function
     return () => {
       if (synth.speaking) {
         synth.cancel();
@@ -162,8 +168,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
         synth.cancel();
       }
 
-      // Make sure we have the latest voices
-      if (synth.getVoices().length > 0 && !utteranceRef.current.voice) {
+      // Make sure we have the latest voices if not set yet
+      if (!utteranceRef.current.voice && synth.getVoices().length > 0) {
         const voices = synth.getVoices();
         const defaultVoice = voices.find(v => v.lang === 'en-US') || voices[0];
         utteranceRef.current.voice = defaultVoice;
@@ -189,7 +195,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
         });
       };
       
-      synth.speak(utteranceRef.current);
+      // Add a short timeout to ensure the speech starts
+      setTimeout(() => {
+        synth.speak(utteranceRef.current!);
+      }, 100);
     } catch (error) {
       console.error("Error in speech synthesis:", error);
       setStatus("idle");
@@ -236,8 +245,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
                         - Vary in sentence structure for a natural speaking rhythm
                         - Express enthusiasm when appropriate
                         
-                        ${superpowerPrompts}
-                        
                         If asked about capabilities, explain you can answer questions, provide information, tell jokes, 
                         discuss interesting topics, and generally have engaging conversations through voice or text.
                         
@@ -270,7 +277,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
       if (assistantMessage) {
         console.log("Assistant message:", assistantMessage.substring(0, 50) + "...");
         addMessage("assistant", assistantMessage);
-        speakMessage(assistantMessage);
+        
+        // Ensure browser is ready for speech synthesis
+        if (synth.speaking) {
+          synth.cancel();
+        }
+        
+        // Small delay to ensure the speech synthesis is ready
+        setTimeout(() => {
+          speakMessage(assistantMessage);
+        }, 300);
       }
     } catch (error) {
       console.error("Error communicating with OpenAI:", error);
@@ -287,6 +303,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     if (state.isRecording) return;
     
     try {
+      // Check if Web Speech API is supported
       if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
         throw new Error("Speech recognition not supported");
       }
@@ -295,48 +312,65 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
       console.log("Initializing SpeechRecognition");
       recognitionRef.current = new SpeechRecognition();
       
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = "en-US";
-      
-      recognitionRef.current.onstart = () => {
-        console.log("Speech recognition started");
-        dispatch({ type: "SET_RECORDING", payload: true });
-        setStatus("listening");
-        dispatch({ type: "CLEAR_TRANSCRIPT" });
-      };
-      
-      recognitionRef.current.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map(result => result[0])
-          .map(result => result.transcript)
-          .join("");
-          
-        console.log("Transcript updated:", transcript);
-        dispatch({ type: "SET_TRANSCRIPT", payload: transcript });
-      };
-      
-      recognitionRef.current.onerror = (event) => {
-        console.error("Speech recognition error:", event.error);
-        stopRecording();
-        toast({
-          title: "Voice recognition error",
-          description: `Error: ${event.error}. Please try again.`,
-          variant: "destructive",
-        });
-      };
-      
-      recognitionRef.current.onend = () => {
-        console.log("Speech recognition ended");
-        if (state.isRecording) {
-          stopRecording();
-        }
-      };
-      
-      console.log("Starting speech recognition");
-      recognitionRef.current.start();
+      // Configure the SpeechRecognition instance
+      if (recognitionRef.current) {
+        recognitionRef.current.continuous = true;
+        recognitionRef.current.interimResults = true;
+        recognitionRef.current.lang = "en-US";
+        
+        recognitionRef.current.onstart = () => {
+          console.log("Speech recognition started");
+          dispatch({ type: "SET_RECORDING", payload: true });
+          setStatus("listening");
+          dispatch({ type: "CLEAR_TRANSCRIPT" });
+        };
+        
+        recognitionRef.current.onresult = (event) => {
+          const transcript = Array.from(event.results)
+            .map(result => result[0])
+            .map(result => result.transcript)
+            .join("");
+            
+          console.log("Transcript updated:", transcript);
+          dispatch({ type: "SET_TRANSCRIPT", payload: transcript });
+        };
+        
+        recognitionRef.current.onerror = (event) => {
+          console.error("Speech recognition error:", event.error);
+          dispatch({ type: "SET_RECORDING", payload: false });
+          setStatus("idle");
+          toast({
+            title: "Voice recognition error",
+            description: `Error: ${event.error}. Please try again.`,
+            variant: "destructive",
+          });
+        };
+        
+        recognitionRef.current.onend = () => {
+          console.log("Speech recognition ended");
+          if (state.isRecording) {
+            const finalTranscript = state.transcript.trim();
+            dispatch({ type: "SET_RECORDING", payload: false });
+            
+            if (finalTranscript) {
+              console.log("Final transcript:", finalTranscript);
+              addMessage("user", finalTranscript);
+              sendMessageToOpenAI(finalTranscript);
+            } else {
+              console.log("No transcript to send");
+              setStatus("idle");
+            }
+          }
+        };
+        
+        // Start speech recognition
+        console.log("Starting speech recognition");
+        recognitionRef.current.start();
+      }
     } catch (error) {
       console.error("Failed to start recording:", error);
+      dispatch({ type: "SET_RECORDING", payload: false });
+      setStatus("idle");
       toast({
         title: "Voice recognition not available",
         description: "Your browser doesn't support voice recognition or access was denied.",
@@ -349,16 +383,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     if (recognitionRef.current) {
       console.log("Stopping speech recognition");
       recognitionRef.current.stop();
-      dispatch({ type: "SET_RECORDING", payload: false });
-      
-      if (state.transcript.trim()) {
-        console.log("Sending transcript to OpenAI:", state.transcript.trim());
-        addMessage("user", state.transcript.trim());
-        sendMessageToOpenAI(state.transcript.trim());
-      } else {
-        console.log("No transcript to send");
-        setStatus("idle");
-      }
     }
   };
 

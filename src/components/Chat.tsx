@@ -35,7 +35,19 @@ const Chat: React.FC = () => {
     const initSpeechSynthesis = () => {
       if ('speechSynthesis' in window) {
         console.log("Speech synthesis available in browser");
-        // Trigger voices loading
+        
+        // Force voices to load
+        window.speechSynthesis.onvoiceschanged = () => {
+          const voices = window.speechSynthesis.getVoices();
+          console.log("Available voices:", voices.map(v => `${v.name} (${v.lang})`));
+          
+          // Warm up speech synthesis with a silent utterance
+          const utterance = new SpeechSynthesisUtterance("");
+          utterance.volume = 0;
+          window.speechSynthesis.speak(utterance);
+        };
+        
+        // Initial load attempt
         window.speechSynthesis.getVoices();
       } else {
         console.error("Speech synthesis not available in this browser");
